@@ -1,0 +1,6 @@
+# ignore notes dir
+notes/
+
+# ignore cache files
+*.pyc
+__pycache__/
