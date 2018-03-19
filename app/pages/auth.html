@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block search-bar %}{% end block %}
+
+{% block page-content %}
+	{{ message }}
+	<form action="/auth" method="post">
+		<input type="text" name="password" autocomplete="off"/>
+		<input type="submit" value="auth"/>
+		<input type="hidden" name="next" value="{{next}}"/>
+	</form>
+
+{% end block %}

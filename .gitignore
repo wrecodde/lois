@@ -4,3 +4,11 @@ notes/
 # ignore cache files
 *.pyc
 __pycache__/
+
+# ignore bootstrap and jquery
+assets/bootstrap/
+assets/jquery/
+
+# porter db
+.porter/
+

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block search-box %}
+	
+	{% block search-results %}
+		
+		{% if error %}
+			<div id="feedback">{{ error }}</div>
+		{% end if %}
+		
+		{% block results %}
+		
+			{% if hits %}
+				
+				{% for hit in hits %}
+				<!-- proceed with saving -->
+					<div class="hitBox">
+						<h3 class="hitHeader">{{ hit['title'] }}</h3>
+						<p class="hitTease">{{ hit['tease'] }}</p>
+						<button class="saveBtn" value="{{hit['url']}}">save</button>
+						<span class="saveStatus"></span>
+					</div>
+				
+				{% end for %}
+			
+			{% else %}
+				<b>no hits</b>
+			{% end if %}
+			
+		{% end block %}
+	{% end block %}
+
+{% end block %}

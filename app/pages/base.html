@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Lois</title>
+		<meta name="viewport" content="width=device-width, scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+		<script src="{{ static_url("jquery/jquery-3.2.1.min.js") }} "></script>
+		<script src="{{ static_url("bootstrap/js/bootstrap.min.js") }}"></script>
+		<script src="{{ static_url("js/lois.js") }} "></script>
+		
+		<link rel="stylesheet" href="{{ static_url("bootstrap/css/bootstrap.min.css") }}"/>
+		<style>
+			#queryBox{
+				text-transform: lowercase;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<div class="container">
+			<div class="row"> <!-- main page's content -->
+				<div class="col-lg-4 col-xs-12"> <!-- side cont (lg scr), top cont (sm scr) -->
+					
+					<div class="row"> <!-- logo and nav row -->
+						{% block header %} <!-- work on alignment for nav -->
+							<div id="page-header"></div>
+						{% end block %}
+					</div>
+					
+					</div class="row"> <!-- search bar row -->
+						<div class="col-xs-12">
+							{% block search-bar %}
+								<div id="search-bar"></div>
+							{% end block %}
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-lg-8 col-xs-12">
+					<div class="row">
+						<div class="col">
+							{% block page-content %}
+								<div id="main-nav"></div>
+								<div id="main-body"></div>
+							{% end block %}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+

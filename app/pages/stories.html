@@ -1,0 +1,44 @@
+<!-- provide an internal search interface for lois-->
+{% extends "index.html" %}
+
+{% block header %}
+<div class="col-xs-12">
+	<div id="page-header">
+		<a href="/"><span>Home</span></a> > <span>Stories</span>
+	</div>
+</div>
+{% end block %}
+
+{% block search-bar %}
+	<div id="search-bar">
+		<form id="searchForm" action="/search" method="post" class="form-horizontal" role="form">
+			<div class="form-group">
+				<div class="col-xs-12">
+					<input name="query" placeholder="search box" id="queryBox" autocomplete="off" class="form-control"/>
+				</div>
+				<input name="scope" type="hidden" value="internal"/>
+				<div class="col-xs-12">
+					<input type="submit" value="search stories" id="fetchBtn" class="btn btn-default btn-block"/>
+				</div>
+			</div>
+		</form>
+	</div>
+{% end block %}
+
+{% block page-content %}
+	{% block all-stories %}
+		{% if stories %}
+			{% for story in stories %}
+				
+				<div class="story">
+					<a href="/stories/{{story['_id']}}">
+						<h3>{{ story['title'] }} <small>by {{ story['author'] }}</small></h3>
+					</a>
+						<p>{{ story['pages'][0][:150] }}...</p>
+				</div>
+			{% end for %}
+		{% else %}
+			<b>no saved story</b>
+		{% end if %}
+	{% end block %}
+{% end block %}

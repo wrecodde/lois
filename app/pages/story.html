@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block search-box %}{% end block %}
+
+{% block page-content %}
+
+	<div class="story">
+		<h3 class="title">{{ story['title'] }}</h3>
+		<span class="author">{{ story['author'] }}</span>
+		<button class="deleteBtn" value="/stories/{{story['_id']}}">delete</button>
+		{% for page in story['pages'] %}
+			<b>page {{ story['pages'].index(page) + 1 }}</b>
+			<p>{{ page }}</p>
+		{% end for %}
+		<button class="deleteBtn" value="/stories/{{story['_id']}}">delete</button>
+	</div>
+
+{% end block %}

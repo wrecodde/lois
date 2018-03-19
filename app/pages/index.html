@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block header %}
+<div class="col-xs-12">
+	<div id="page-header">
+		<a href="/"><h3>Home</h3></a>
+	</div>
+</div>
+{% end block %}
+
+{% block search-bar %}
+	<div id="search-bar">
+		<form id="searchForm" action="/search" method="post" class="form-horizontal" role="form">
+			<div class="form-group">
+				<div class="col-xs-12">
+					<input name="query" placeholder="search box" id="queryBox" autocomplete="off" class="form-control"/>
+				</div>
+				<input name="scope" type="hidden" value="external"/>
+				<div class="col-xs-12">
+					<input type="submit" value="fetch stories" id="fetchBtn" class="btn btn-default btn-block"/>
+				</div>
+			</div>
+		</form>
+	</div>
+{% end block %}
+
+{% block page-content %}
+<div class="row">
+	<div class="col-xs-12">
+		<div id="main-nav">
+		
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-xs-12">
+	<div id="main-body">
+	{% block recent-stories %}
+		{% if recent %}
+			{% for story in recent %}
+				<div class="story">
+					<a href="/stories/{{story['_id']}}">
+						<h3>{{ story['title'] }}
+						<small>by {{ story['author'] }}</small></h3>
+					</a>
+						<p class="lead">{{ story['pages'][0][:250] }}...</p>
+				</div>
+			{% end for %}
+		{% else %}
+			<h2>no recent stories</h2>
+			<p>add some when you want to</p>
+		{% end if %}
+	{% end block %}
+	</div>
+	</div>
+</div>
+
+{% end block %}
