@@ -10,6 +10,9 @@ import json
 import secrets
 from operator import attrgetter
 
+# story header bar
+# auth page
+
 import lois
 import porter_db as porter
 
@@ -63,11 +66,9 @@ class AuthHandler(BaseHandler):
 class SearchHandler(BaseHandler):
 	def get(self):
 		# used for testing in place of .xget()
-		hit = ("this is the title", "some url", "and briefs")
-		hits = [hit]*4
-		page = "<input type='button' class='klicker' value='now!'/>"
-		r = {"error":None, "hits":hits, "page":page}
-		self.write(json.dumps(r))
+		raw = open('notes/searchpage2.txt').read()
+		hits = lois.parse_for_urls(raw, extra=True)
+		self.render("results.html", error=None, hits=hits)
 	
 	@tornado.web.authenticated
 	def xget(self):
@@ -87,11 +88,14 @@ class SearchHandler(BaseHandler):
 		query = self.get_argument("query")
 		scope = self.get_argument("scope")
 		
-		try:
-			hits = lois.get_hits(query)
-			self.render("results.html", error=None, hits=hits)
-		except:
-			self.render("results.html", error="no internet connection", hits=[])
+		if scope == "external":
+			try:
+				hits = lois.get_hits(query)
+				self.render("results.html", error=None, hits=hits)
+			except:
+				self.render("results.html", error="no internet connection", hits=[])
+		elif scope == "internal":
+			pass # coming up later
 
 class Stories(BaseHandler):
 	@tornado.web.authenticated
@@ -154,7 +158,7 @@ settings = dict(
 	template_path = os.path.join(os.path.dirname(__file__), "pages"),
 	static_path = os.path.join(os.path.dirname(__file__), "assets"),
 	login_url = "/auth",
-	auto_escape = None,
+	autoescape = None,
 )
 
 app = tornado.web.Application(handlers, **settings)

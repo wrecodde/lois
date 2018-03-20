@@ -3,6 +3,12 @@ import requests
 from bs4 import BeautifulSoup as Bs
 import re
 
+try:
+	import html5lib
+	parser = 'html5lib'
+except:
+	parser = 'html.parser'
+
 
 def connected():
 	try:
@@ -35,7 +41,7 @@ def parse_for_urls(results_page, extra=False):
 	# parses a google results page to extract possible hits.
 	# works completely offline
 	
-	soup = Bs(results_page, "html5lib")
+	soup = Bs(results_page, parser)
 	hits = soup.find_all("div", attrs={"class":"g"})
 	straight_link = r"([\w\s',\.-]+) - ([\w\s'/,\.-]+)(https://[\w\./-]+)CachedSimilar([\w\s',\./-]+)"
 	
@@ -58,13 +64,13 @@ def parse_for_urls(results_page, extra=False):
 
 def parse_for_stories(html_page):
 	# parses an html page (of a story).
-	# shoukd work offline. excpet if there are multiple pages
+	# should work offline. excpet if there are multiple pages
 	# then it would attepmt to fetch those.
 	
 	header = []
 	pages = []
 	
-	soup = Bs(html_page, "html5lib")
+	soup = Bs(html_page, parser)
 	head = soup.find("div", attrs={"class":"b-story-header"}).text
 	body = soup.find("div", attrs={"class":"b-story-body-x"}).text
 	

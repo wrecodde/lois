@@ -1,18 +1,20 @@
 {% extends "base.html" %}
 
-{% block search-box %}{% end block %}
+{% block search-bar %}{% end block %}
 
 {% block page-content %}
-
+	<h3 style="text-decoration: underline">a story</h3>
 	<div class="story">
-		<h3 class="title">{{ story['title'] }}</h3>
-		<span class="author">{{ story['author'] }}</span>
-		<button class="deleteBtn" value="/stories/{{story['_id']}}">delete</button>
+		<div class="navbar-static-top">
+			<h3 class="title">{{ story['title'] }} <button class="deleteBtn btn btn-danger btn-sm" value="/stories/{{story['_id']}}">delete</button></h3>
+		</div>
 		{% for page in story['pages'] %}
-			<b>page {{ story['pages'].index(page) + 1 }}</b>
-			<p>{{ page }}</p>
+		{% import markdown %}
+			<div>
+				<div style="background: #c8c8c8; padding-left: 15px;">PAGE {{ story['pages'].index(page) + 1 }}</div>
+				<p class="lead">{{ markdown.markdown(page) }}</p>
+			</div>
 		{% end for %}
-		<button class="deleteBtn" value="/stories/{{story['_id']}}">delete</button>
 	</div>
 
 {% end block %}
