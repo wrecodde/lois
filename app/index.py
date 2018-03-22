@@ -9,8 +9,10 @@ import os
 import json
 import secrets
 from operator import attrgetter
+from operator import itemgetter
 
 # story header bar
+# add "to the top" button
 # auth page
 
 import lois
@@ -38,7 +40,7 @@ class IndexHandler(BaseHandler):
 	@tornado.web.authenticated
 	def get(self):
 		stories = self.stories.fetch_all()
-		self.render("index.html", recent=stories[:3])
+		self.render("index.html", recent=stories[-3:])
 
 class AuthHandler(BaseHandler):
 	def get(self):
@@ -101,6 +103,7 @@ class Stories(BaseHandler):
 	@tornado.web.authenticated
 	def get(self):
 		stories = self.stories.fetch_all()
+		stories = sorted(stories, key=itemgetter('_id'), reverse=True)
 		self.render("stories.html", stories=stories)
 
 class StoryHandler(BaseHandler):
@@ -108,7 +111,8 @@ class StoryHandler(BaseHandler):
 	def get(self, story_id):
 		story = self.stories.fetch(story_id)
 		if not story:
-			raise tornado.web.HTTPError(404)
+			# raise tornado.web.HTTPError(404)
+			pass
 		self.render("story.html", story=story)
 	
 	@tornado.web.authenticated
@@ -136,7 +140,7 @@ class Save(BaseHandler):
 
 class LoisHandler(BaseHandler):
 	def get(self):
-		self.write("poseidon")
+		self.render("lois.html")
 	
 	def xget(self):
 		self.render("lois.html")
