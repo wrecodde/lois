@@ -5,9 +5,11 @@ $(".saveBtn").on("click", function(){
 	var feedback = $(this).siblings(".saveStatus");
 	$.get("/save", {"story_url":target}, function(){feedback.text("saving")}).
 		done(function(){
+			feedback.removeClass("text-danger")
 			feedback.addClass("text-success")
 			feedback.text("saved")}).
 		fail(function(){
+			feedback.removeClass("text-success")
 			feedback.addClass("text-danger")
 			feedback.text("failed")});
 });
