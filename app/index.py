@@ -25,6 +25,10 @@ class BaseHandler(tornado.web.RequestHandler):
 	stories = porter.DataBase("stories")
 	trash = porter.DataBase("trash")
 	
+	def load_db(self):
+		self.stories = porter.DataBase("stories")
+		self.trash = porter.DataBase("trash")
+	
 	def get_current_user(self):
 		return self.get_secure_cookie("auth")
 	
@@ -136,7 +140,6 @@ class Save(BaseHandler):
 		
 		self.stories.insert(story)
 		self.stories.save()
-		return
 
 class LoisHandler(BaseHandler):
 	def get(self):
