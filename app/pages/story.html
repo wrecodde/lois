@@ -6,7 +6,7 @@
 	<h3 style="text-decoration: underline">a story</h3>
 	<div class="story">
 		<div class="navbar-static-top">
-			<h3 class="title">{{ story['title'] }} <button class="deleteBtn btn btn-danger btn-sm" value="/stories/{{story['_id']}}">delete</button></h3>
+			<h3 class="title">{{ story['title'] }}</h3>
 		</div>
 		{% for page in story['pages'] %}
 		{% import markdown %}
@@ -15,6 +15,12 @@
 				<p class="lead">{{ markdown.markdown(page) }}</p>
 			</div>
 		{% end for %}
+		
 	</div>
+	<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
+		<div>
+			 <button class="deleteBtn btn btn-danger btn-sm pull-right" value="/stories/{{story['_id']}}" style="margin-top: 7px; margin-right: 10px;">delete</button>
+		</div>
+	</nav>
 
 {% end block %}
