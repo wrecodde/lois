@@ -3,11 +3,18 @@
 {% block search-bar %}{% end block %}
 
 {% block page-content %}
-	{{ message }}
-	<form action="/auth" method="post">
-		<input type="text" name="password" autocomplete="off"/>
-		<input type="submit" value="auth"/>
-		<input type="hidden" name="next" value="{{next}}"/>
-	</form>
+	<div class="">
+		<strong>{{ message }}</strong>
+	</div>
+	
+	<div class="">
+		<form action="/auth" method="post" role="form">
+			<div class="form-group">
+				<input type="text" name="password" autocomplete="off" class="form-control"/>
+			</div>
+			<input type="submit" value="auth" class="btn btn-default" style="background: #aaa; color: #fff; padding: 5px 25px 5px 25px;"/>
+			<input type="hidden" name="next" value="{{next}}"/>
+		</form>
+	</div>
 
 {% end block %}
