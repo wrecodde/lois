@@ -143,7 +143,8 @@ class Save(BaseHandler):
 
 class LoisHandler(BaseHandler):
 	def get(self):
-		self.render("lois.html")
+		#self.render("lois.html")
+		self.write("shakka")
 	
 	def xget(self):
 		self.render("lois.html")
