@@ -21,13 +21,12 @@ import porter_db as porter
 from tornado.options import define
 define("port", default=3304, type=int)
 
+
 class BaseHandler(tornado.web.RequestHandler):
 	stories = porter.DataBase("stories")
 	trash = porter.DataBase("trash")
 	
-	def load_db(self):
-		self.stories = porter.DataBase("stories")
-		self.trash = porter.DataBase("trash")
+	lois = porter.DataBase("lois")
 	
 	def get_current_user(self):
 		return self.get_secure_cookie("auth")
@@ -115,8 +114,7 @@ class StoryHandler(BaseHandler):
 	def get(self, story_id):
 		story = self.stories.fetch(story_id)
 		if not story:
-			# raise tornado.web.HTTPError(404)
-			pass
+			story = self.stories.fetch(int(story_id))
 		self.render("story.html", story=story)
 	
 	@tornado.web.authenticated
@@ -142,12 +140,29 @@ class Save(BaseHandler):
 		self.stories.save()
 
 class LoisHandler(BaseHandler):
-	def get(self):
-		#self.render("lois.html")
-		self.write("shakka")
-	
-	def xget(self):
+	def get(self, *args):
 		self.render("lois.html")
+	
+	def post(self):
+		action = self.get_argument("action")
+		if action == "0":
+			import random
+			self.lois.insert({"number": random.choice(range(33))})
+		elif action == "1":
+			print(self.lois.fetch_all())
+
+class Leila(LoisHandler):
+	def get(self, *args):
+		self.render("leila.html")
+	
+	def post(self):
+		action = self.get_argument("action")
+		
+		if action == "0":
+			import random
+			self.lois.insert({"number": random.choice(range(33))})
+		elif action == "1":
+			print(self.lois.fetch(0))
 
 
 handlers = [
@@ -158,6 +173,7 @@ handlers = [
 	(r"/stories/([0-9]+)", StoryHandler),
 	(r"/save", Save),
 	(r"/lois", LoisHandler),
+	(r"/leila", Leila),
 ]
 
 settings = dict(

@@ -3,6 +3,11 @@
 {% block search-bar %}{% end block %}
 
 {% block page-content %}
+	{% if not story %}
+	<div class="jumbotron">
+		<h3>story does not exist</h3>
+	</div>
+	{% else %}
 	<h3 style="text-decoration: underline">a story</h3>
 	<div class="story">
 		<div class="navbar-static-top">
@@ -10,17 +15,18 @@
 		</div>
 		{% for page in story['pages'] %}
 		{% import markdown %}
-			<div>
+			<div class="clearfix">
 				<div style="background: #c8c8c8; padding-left: 15px;">PAGE {{ story['pages'].index(page) + 1 }}</div>
 				<p class="lead">{{ markdown.markdown(page) }}</p>
 			</div>
 		{% end for %}
 	
 	</div>
-	<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
+	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 		<div>
 			 <button class="deleteBtn btn btn-danger btn-sm pull-right" value="/stories/{{story['_id']}}" style="margin-top: 7px; margin-right: 10px;">delete</button>
 		</div>
 	</nav>
+	{% end if %}
 
 {% end block %}
