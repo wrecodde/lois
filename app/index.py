@@ -120,6 +120,9 @@ class StoryHandler(BaseHandler):
 	@tornado.web.authenticated
 	def delete(self, story_id):
 		story = self.stories.fetch(story_id)
+		if not story:
+			story = self.stories.fetch(int(story_id))
+			story_id = int(story_id)
 		self.trash.insert(story)
 		self.stories.delete(story_id)
 		self.stories.save()
