@@ -19,8 +19,8 @@ class Hit:
 		self.parse_hit(raw_hit)
 	
 	def parse_hit(self, raw_hit):
-		hit_rgx = r"(.*)(https://.*)CachedSimilar(.*)"
-		title_rgx = r"(.*) - (.*) - (.*)"
+		hit_rgx = r"(.*)(https://.*)(CachedSimilar|Cached)(.*)"
+		title_rgx = r"(.*) - (.*)*"
 		
 		raw_text = raw_hit.text.replace("\n", "")
 		match = re.search(hit_rgx, raw_text)
@@ -31,7 +31,7 @@ class Hit:
 			
 			self.title = match_title.group(1)
 			self.url = match.group(2)
-			self.brief = match.group(3)
+			self.brief = match.group(4)
 			self.valid = True
 		else:
 			self.valid = False
