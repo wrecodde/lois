@@ -4,3 +4,5 @@ requests
 porter-db
 html5lib
 markdown
+tinydb
+whoosh
