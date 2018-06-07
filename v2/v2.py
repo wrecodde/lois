@@ -29,7 +29,7 @@ class BaseHandler(tornado.web.RequestHandler):
 class IndexHandler(BaseHandler):
 	# @tornado.web.authenticated
 	def get(self):
-		self.render("slease.html")
+		self.render("index.html")
 	
 	def post(self):
 		self.write("data sent")
@@ -64,15 +64,8 @@ class AuthHandler(BaseHandler):
 		else:
 			self.render("auth.html", message="failed")
 
-class SearchHandler(BaseHandler):
-	# to be made into a socket
-	def get(self):
-		self.render("search.html")
-	
-	def post(self):
-		query = self.get_argument("query")
-
 class Stories(BaseHandler):
+	# main stories page
 	@tornado.web.authenticated
 	def get(self):
 		self.render("stories.html")
@@ -97,7 +90,30 @@ class StoryHandler(BaseHandler):
 		feedback = service.trash_story(story_id)
 		self.write(feedback)
 
-class Save(BaseHandler):
+class SearchHandler(BaseHandler):
+	# search app database for query
+	def get(self):
+		self.render("search.html")
+	
+	def post(self):
+		query = self.get_argument("query")
+		for h in service.search.lookup(query):
+			print(h)
+		
+		self.write("heimlich")
+		# perform preprocesses
+		# pass query onto service.search.lookup
+
+
+class AddNewStories(BaseHandler):
+	def get(self):
+		self.render("addnew.html")
+	
+	def post(self):
+		query = self.get_argument("query")
+		service.search.open_lookup(query)
+
+class SaveStory(BaseHandler):
 	@tornado.web.authenticated
 	@tornado.gen.coroutine
 	def get(self):
@@ -107,6 +123,8 @@ class Save(BaseHandler):
 		# fetch the web page at the url and pass it to
 		# service.save_story()
 		# use executor to make asynchronous
+
+
 
 class LoisHandler(BaseHandler):
 	def get(self, *args):
@@ -134,13 +152,19 @@ class Leila(LoisHandler):
 			print(self.lois.fetch(0))
 
 
+
 handlers = [
 	(r"/", IndexHandler),
 	(r"/auth", AuthHandler),
 	(r"/search", SearchHandler),
 	(r"/stories", Stories),
 	(r"/stories/([0-9]+)", StoryHandler),
-	(r"/save", Save),
+	
+	# add new stories
+	(r"/add-new", AddNewStories),
+	(r"/save", SaveStory),
+	
+	# supplementary pages
 	(r"/lois", LoisHandler),
 	(r"/leila", Leila),
 ]

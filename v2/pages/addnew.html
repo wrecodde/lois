@@ -1,16 +1,11 @@
-{% extends "_base.html" %}
+{% extends "base.html" %}
 
 {% block search-bar %}
 
-<script src="{{ static_url("js/search.js") }}"></script>
-
 <form>
 	<input id="search-box"/>
+	<input type="radio" value="internal"/>
 	<input type="submit" value="search" id="search-btn"/>
 </form>
-
-<div id="results">
-	
-</div>
 
 {% end block %}

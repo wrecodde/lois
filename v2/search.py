@@ -61,11 +61,17 @@ def lookup(query):
 	return hits
 	searcher.close()
 
-def open_search(query):
-	# stuff
+def open_lookup(query):
+	# make an internet search of given queries
+	search_engine = "https://google.com/search?q="
 	
-	query = "+".join(query.lower().split())
+	keywords = query.lower().split()
+	query_string = "+".join(keywords)
 	
+	print("here")
+	query = search_engine + query_string
+	#results = requests.get(query).text
+	#print(len(results))
 
 
 STORY_SCHEMA = Schema(
