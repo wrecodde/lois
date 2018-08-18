@@ -1,5 +1,5 @@
 tornado
-BeautifulSoup
+BeautifulSoup4
 requests
 porter-db
 html5lib
