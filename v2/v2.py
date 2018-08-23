@@ -20,7 +20,8 @@ class BaseHandler(tornado.web.RequestHandler):
 		    session_cookie = self.get_secure_cookie("user_session")
 		    # decrypt and extract component user info
 		    # feed back to auth handler
-		else:
+		except:
+			
 			# should an error occur
 			return None
 	
