@@ -1,5 +1,5 @@
 import sys
 sys.path = ["v2"] + sys.path
 
-from .index import start
+from .v2 import start
 startapp = index.start
