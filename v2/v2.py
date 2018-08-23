@@ -16,7 +16,13 @@ define("port", default=33041, type=int)
 
 class BaseHandler(tornado.web.RequestHandler):
 	def get_current_user(self):
-		return self.get_secure_cookie("auth")
+		try:
+		    session_cookie = self.get_secure_cookie("user_session")
+		    # decrypt and extract component user info
+		    # feed back to auth handler
+		else:
+			# should an error occur
+			return None
 	
 	def password_hash(self, p):
 		try:
@@ -27,50 +33,38 @@ class BaseHandler(tornado.web.RequestHandler):
 			return None
 
 class IndexHandler(BaseHandler):
-	# @tornado.web.authenticated
+	@tornado.web.authenticated
 	def get(self):
-		self.render("slease.html")
+		self.render("index.html")
 	
+	@tornado.web.authenticated
 	def post(self):
 		self.write("data sent")
 
 class AuthHandler(BaseHandler):
 	def get(self):
 		next_page = self.get_argument("next", "/")
-		auth_token = self.get_current_user()
-		if auth_token is None:
+		user_session = self.get_current_user()
+		if user_session is None:
 			# no user is logged in
-			self.render("auth.html", message="authentication", next=next_page)
+			self.render("auth.html", next=next_page)
 		else:
-			# assume a user is logged in
-			# confirm token
-			self.redirect("/")
+			# re-authenticate user
+			self.redirect(next_page)
 	
 	def post(self):
-		password = self.get_argument("password", None)
-		next_page = self.get_argument("next", "/")
-		session = self.get_argument("session", "open")
+		# get and confirm user creds
 		
-		key = self.password_hash(password)
-		lock = 799920
-		
-		if session == "close":
-			self.clear_cookie("auth")
-			return
-		
-		if key == lock:
-			self.set_secure_cookie("auth", secrets.token_hex(8), expires_days=1)
-			self.redirect(next_page)
-		else:
-			self.render("auth.html", message="failed")
+		self.set_secure_cookie("user_session", b"encryptediInfo")
+		# communication is via ajax
 
 class SearchHandler(BaseHandler):
-	# to be made into a socket
 	def get(self):
-		self.render("search.html")
+		pass
 	
 	def post(self):
-		query = self.get_argument("query")
+		query = self.get_argument("q")
+		scope = self.get_argument("s", "all")
 
 class Stories(BaseHandler):
 	@tornado.web.authenticated
@@ -136,7 +130,8 @@ class Leila(LoisHandler):
 
 handlers = [
 	(r"/", IndexHandler),
-	(r"/auth", AuthHandler),
+	(r"/auth/signup", AuthSignUpHandler),
+	(r"/auth/signin", AuthSignInHandler),
 	(r"/search", SearchHandler),
 	(r"/stories", Stories),
 	(r"/stories/([0-9]+)", StoryHandler),
@@ -148,8 +143,8 @@ handlers = [
 settings = dict(
 	debug = True,
 	cookie_secret = secrets.token_hex(5),
-	template_path = os.path.join(os.path.dirname(__file__), "pages"),
-	static_path = os.path.join(os.path.dirname(__file__), "assets"),
+	template_path = os.path.join(os.path.dirname(__file__), "templates"),
+	static_path = os.path.join(os.path.dirname(__file__), "static"),
 	login_url = "/auth",
 	autoescape = None,
 )

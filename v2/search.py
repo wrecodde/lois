@@ -1,4 +1,4 @@
-# separate search functionality
+# search module
 
 import os
 import requests
@@ -9,9 +9,6 @@ import whoosh
 from whoosh.index import open_dir, create_in
 from whoosh.qparser import MultifieldParser, OrGroup
 from whoosh.fields import Schema, TEXT, ID
-
-
-
 
 
 class ParseError(BaseException):
@@ -39,19 +36,19 @@ def index_story(story):
 	if not isinstance(story, lois.Story):
 		raise ParseError(f"failed to parse {story}.")
 	
-	prep = "\n----".join([i["page"] for i in story.pages])
+	prepped_pages = "\n----".join([i["page"] for i in story.pages])
 	
 	try:
 		writer = INDEX.writer()
 		writer.add_document(
 			title = story.title,
 			author = story.author,
-			story = prep,
+			story = prepped_pages,
 			uid = story.uid)
 	finally:
 		writer.commit()
 
-def lookup(query):
+def local_search(query):
 	# make a search of app's database
 	# results max length is 15
 	query = Q_PARSER.parse(query)
@@ -61,8 +58,8 @@ def lookup(query):
 	return hits
 	searcher.close()
 
-def open_search(query):
-	# stuff
+def internet_lookup(query):
+	# make search queries to multiple sites
 	
 	query = "+".join(query.lower().split())
 	

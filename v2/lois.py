@@ -5,7 +5,8 @@ import requests
 import bs4
 bsoup = bs4.BeautifulSoup
 
-class Hit:
+class HitDump:
+	# depreciated
 	# attempt to parse search results
 	title = ""
 	url = ""
@@ -53,7 +54,8 @@ class Hit:
 		hit = {"title": self.title, "url": self.url, "brief": self.brief}
 		return hit
 
-class Story:
+class StoryDump:
+	# depreciated
 	title = ""
 	author = ""
 	pages = []
@@ -115,3 +117,25 @@ class Story:
 		self.uid = str(p.get("uid"))
 		
 		return self
+
+class SearchHit:
+	# efficiently represent a search hit
+	# from local and internet searches
+	
+	# title
+	# url
+	# brief
+	# uid
+	
+	pass
+
+class Story:
+	# efficiently represent a story
+	# primary interface between database and app
+	pass
+
+
+def get_story_site():
+	# specified function to fetch and parse stories
+	# from supported sites
+	pass

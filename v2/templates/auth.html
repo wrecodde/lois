@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block page-content %}
+
+	<div class="row">
+		<div class="col">
+			<div class="row">
+				<div class="col">
+					<h3 id="auth-text">provide secure credentials</h3>
+					<strong id="auth-feedback"></strong>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col">
+					<form>
+						<div class="form-group">
+							<input type="password" class="form-control" id="auth-password">
+						</div>
+						<button type="submit" class="btn btn-primary" id="auth-btn">authenticate</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<style>
+	#holder{
+		
+	}
+</style>
+<script>
+	let next_page = "{{ next }}";
+</script>
+<script src="{{ static_url("lois/js/user_authentication.js") }}"></script>
+{% end block %}
