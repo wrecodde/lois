@@ -2,16 +2,6 @@ import tornado.web
 import tornado.ioloop
 import tornado.options
 import tornado.gen
-import tornado.httpserver
-import tornado.httpclient
-
-import os
-import secrets
-
-import service
-
-from tornado.options import define
-define("port", default=33041, type=int)
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -42,22 +32,33 @@ class IndexHandler(BaseHandler):
 	def post(self):
 		self.write("data sent")
 
-class AuthHandler(BaseHandler):
+
+# authentication
+class Auth_SignIn(BaseHandler):
 	def get(self):
 		next_page = self.get_argument("next", "/")
 		user_session = self.get_current_user()
 		if user_session is None:
 			# no user is logged in
-			self.render("auth.html", next=next_page)
+			self.render("auth/signin.html", next=next_page)
 		else:
 			# re-authenticate user
-			self.redirect(next_page)
+			self.clear_secure_cookie("user_session")
+			self.redirect("/auth/signin", next_page=next_page)
 	
 	def post(self):
 		# get and confirm user creds
+		user = self.get_query_argument("user")
+		next = self.get_argument("next_page")
+		
+		print(user, next)
 		
 		self.set_secure_cookie("user_session", b"encryptediInfo")
 		# communication is via ajax
+
+class Auth_SignUp(BaseHandler):
+	pass
+
 
 class SearchHandler(BaseHandler):
 	def get(self):
@@ -103,61 +104,3 @@ class Save(BaseHandler):
 		# service.save_story()
 		# use executor to make asynchronous
 
-class LoisHandler(BaseHandler):
-	def get(self, *args):
-		self.render("lois.html")
-	
-	def post(self):
-		action = self.get_argument("action")
-		if action == "0":
-			import random
-			self.lois.insert({"number": random.choice(range(33))})
-		elif action == "1":
-			print(self.lois.fetch_all())
-
-class Leila(LoisHandler):
-	def get(self, *args):
-		self.render("leila.html")
-	
-	def post(self):
-		action = self.get_argument("action")
-		
-		if action == "0":
-			import random
-			self.lois.insert({"number": random.choice(range(33))})
-		elif action == "1":
-			print(self.lois.fetch(0))
-
-
-handlers = [
-	(r"/", IndexHandler),
-	(r"/auth/signup", AuthSignUpHandler),
-	(r"/auth/signin", AuthSignInHandler),
-	(r"/search", SearchHandler),
-	(r"/stories", Stories),
-	(r"/stories/([0-9]+)", StoryHandler),
-	(r"/save", Save),
-	(r"/lois", LoisHandler),
-	(r"/leila", Leila),
-]
-
-settings = dict(
-	debug = True,
-	cookie_secret = secrets.token_hex(5),
-	template_path = os.path.join(os.path.dirname(__file__), "templates"),
-	static_path = os.path.join(os.path.dirname(__file__), "static"),
-	login_url = "/auth",
-	autoescape = None,
-)
-
-app = tornado.web.Application(handlers, **settings)
-def start():
-	tornado.options.parse_command_line()
-	port = tornado.options.options.port
-	server = tornado.httpserver.HTTPServer(app)
-	server.listen(port)
-	
-	tornado.ioloop.IOLoop.instance().start()
-
-if __name__ == "__main__":
-	start()

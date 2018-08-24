@@ -43,7 +43,7 @@ class IndexHandler(BaseHandler):
 	@tornado.web.authenticated
 	def get(self):
 		stories = self.stories.fetch_all()
-		self.render("index.html", recent=stories[-3:])
+		self.render("index.html", recent=stories[-5:])
 
 class AuthHandler(BaseHandler):
 	def get(self):
@@ -64,7 +64,7 @@ class AuthHandler(BaseHandler):
 		
 		if key == lock:
 			self.set_secure_cookie("auth", "locker", expires_days=1)
-			self.redirect(next_page)
+			self.redirect("/")
 		else:
 			self.render("auth.html", message="failed")
 

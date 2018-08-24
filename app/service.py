@@ -7,6 +7,7 @@ import search
 
 # database config: tinydb
 db_path = os.path.join(os.path.dirname(__file__), ".service")
+
 if not os.path.isdir(db_path):
 	os.mkdir(db_path)
 

@@ -1,6 +1,6 @@
 // send and process requests to server
 let send_auth = function(auth_payload){
-    $.ajax("/auth",
+    $.ajax("/auth/signin",
    {
        method: "post",
        dataType: "json",
@@ -14,14 +14,16 @@ let eval_auth = function(response, status, object){
 	alert(JSON.stringify(response))
 }
 
-$("#auth-btn").on("click", function prep_auth(event){
+$("#auth_btn").on("click", function prep_auth(event){
 	event.preventDefault();
 	
     // collect data and send to server
-    password = $("#auth-password").val()
+    user_id = $("#user_id").val()
+    user_key = $("#user_key").val()
+    next_page = $("#next_pg_url").val()
     
     payload = {
-        "auth_key": password,
+        "user": "burger",
         "next_page": next_page,
     }
     

@@ -15,8 +15,10 @@ class ParseError(BaseException):
 	def __init__(self, message):
 		return
 
+file_root = os.path.dirname(__file__) # read, cwd
+default_path = os.path.join(file_root, ".service/index")
 
-def open_index(path="./.service/index", schema="", name="stories"):
+def open_index(path=default_path, schema="", name="stories"):
 	# schema: schema to use
 	# name: index name to apply
 	if not os.path.isdir(path):

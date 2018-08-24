@@ -1,0 +1,14 @@
+{% extends "../base.html" %}
+
+{% block page-content %}
+
+<form>
+	<input id="user_id" type="text"/>
+	<input id="user_key" type="password"/>
+	<input type="hidden" id="next_pg_url" value="{{ next }}"/>
+	<button id="auth_btn">confirm creds</button>
+</form>
+
+<script src="{{ static_url("lois/js/user_auth.js") }}"></script>
+
+{% end block %}

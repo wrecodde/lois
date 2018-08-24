@@ -8,10 +8,20 @@
 		<h3>story does not exist</h3>
 	</div>
 	{% else %}
-	<h3 style="text-decoration: underline">a story</h3>
+	<!--<h3 style="text-decoration: underline">a story</h3>-->
+	<class div="dropdown">
+		<button type="button" class="btn dropdown-toggle" id="storyDropDown" data-toggle="dropdown">
+			Menu
+		</button>
+		<ul class="dropdown-menu" role="menu" aria-labelledby="storyDropDown">
+			<li role="presentation">
+				<a role="menuitem" tabindex="-1">Item1</a>
+			</li>
+		</ul>
+	</class>
 	<div class="story">
 		<div class="navbar-static-top">
-			<h3 class="title">{{ story['title'] }}</h3>
+			<h2 class="title">{{ story['title'] }}</h2>
 		</div>
 		{% for page in story['pages'] %}
 		{% import markdown %}

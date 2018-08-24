@@ -1,126 +1,141 @@
+import re
+import hashlib
 
 import requests
-from bs4 import BeautifulSoup as Bs
-import re
+import bs4
+bsoup = bs4.BeautifulSoup
 
-try:
-	import html5lib
-	parser = 'html5lib'
-except:
-	parser = 'html.parser'
-
-
-def connected():
-	try:
-		requests.get("https://google.com")
-		return True
-	except:
-		return False
-
-def fetch_search(parsed_query):
-	search_url = "https://google.com/search?q="
-	if connected():
-		results_page = requests.get(search_url+parsed_query)
-		return results_page
-	else:
-		return None
-
-def fetch_story(url):
-	if connected():
-		page = requests.get(url)
-		return parse_page(page.text)
-	else:
-		return None
-
-def parse_query(query):
-	keywords = query.lower().split()
-	parsed_query = "+".join(keywords)
-	return parsed_query
-
-def parse_for_urls(results_page, extra=False):
-	# parses a google results page to extract possible hits.
-	# works completely offline
+class HitDump:
+	# depreciated
+	# attempt to parse search results
+	title = ""
+	url = ""
+	brief = ""
+	valid = False
 	
-	soup = Bs(results_page, parser)
-	hits = soup.find_all("div", attrs={"class":"g"})
-	straight_link = r"([\w\s',\.-]+) - ([\w\s'/,\.-]+)(https://[\w\./-]+)CachedSimilar([\w\s',\./-]+)"
+	def __init__(self, story=None, raw_hit=None):
+		if not story:
+			# raw hit must be of type Tag element
+			if not isinstance(raw_hit, bs4.element.Tag):
+				return # or raise error
+			self.parse_hit(raw_hit)
+		
+		# or parse story object from internal search results
+		self.parse_story(story)
 	
-	url_list = []
-	extras = []
 	
-	for hit in hits:
-		parse = re.search(straight_link, hit.text)
-		if parse:
-			title = parse.group(1)
-			url = parse.group(3)
-			brief = parse.group(4)
-			hit_object = {"title":title, "tease":brief, "url":url}
-			extras.append(hit_object)
-			url_list.append(url)
-	if extra:
-		return extras
+	def parse_story(self, story):
+		self.title = story.title
+		self.url = "/stories/" + story.story_id
+		self.brief = story.pages[0]["page_content"][:150]
+		self.valid = True
+		return
 	
-	return url_list
+	def parse_hit(self, raw_hit):
+		hit_rgx = r"(.*)(https://.*)(CachedSimilar|Cached)(.*)"
+		title_rgx = r"(.*) - (.*)*"
+		
+		raw_text = raw_hit.text.replace("\n", "")
+		match = re.search(hit_rgx, raw_text)
+		
+		if match:
+			raw_title = match.group(1)
+			match_title = re.search(title_rgx, raw_title)
+			
+			self.title = match_title.group(1)
+			self.url = match.group(2)
+			self.brief = match.group(4)
+			self.valid = True
+		else:
+			self.valid = False
+			return
+	
+	def transform(self):
+		hit = {"title": self.title, "url": self.url, "brief": self.brief}
+		return hit
 
-def parse_for_stories(html_page):
-	# parses an html page (of a story).
-	# should work offline. excpet if there are multiple pages
-	# then it would attepmt to fetch those.
-	
-	header = []
+class StoryDump:
+	# depreciated
+	title = ""
+	author = ""
 	pages = []
 	
-	soup = Bs(html_page, parser)
-	head = soup.find("div", attrs={"class":"b-story-header"}).text
-	body = soup.find("div", attrs={"class":"b-story-body-x"}).text
+	url = "" # unique identifier
+	uid = "" # hash of story url
 	
-	parse_header = re.search(r"([\w\s'.,/-]+)\n\s*by([\w\s',/-]+)", head)
-	if parse_header:
-		header.append(parse_header.group(1))
-		header.append(parse_header.group(2))
-	
-	header.append(head)
-	pages.append(body)
-	
-	while True:
-		next_page = soup.find("a", attrs={"class":"b-pager-next"})
-		if next_page:
-			new_page = requests.get(next_page["href"])
-			soup = Bs(new_page.text, "html5lib")
-			body = soup.find("div", attrs={"class":"b-story-body-x"}).text
-			pages.append(body)
-
+	def __init__(self, url=None, web_page=None):
+		if url:
+			web_page = requests.get(url)
+			self.parse_page(web_page.text)
 		else:
-			break
+			if web_page:
+				self.parse_page(web_page)
 	
-	story_object = {"title":header[0], "author":header[1], "pages":pages}
-	return story_object
-
-def get_stories(query):
-	parsed_query = parse_query(query)
-	if connected():
-		results = fetch_search(parsed_query)
-		urls = parse_for_urls(results)
+	def parse_page(self, web_page):
+		page_soup = bsoup(web_page, "html5lib")
 		
-		# terribly synchronous
-		stories = []
+		# url in page is on the twitter button
+		twitter_btn = page_soup.find("a", attrs={"class":"twitter-share-button"})
+		self.title = twitter_btn["data-text"]
+		self.url = twitter_btn["data-url"]
+		self.uid = hashlib.md5(self.url.encode()).hexdigest()
 		
-		for url in urls:
-			story = fetch_story(url)
-			stories.append(story)
+		# author extract
+		author_soup = page_soup.find("span", attrs={"class":"b-story-user-y"})
+		self.author = author_soup.text
 		
-		return stories
+		# first page
+		fp = page_soup.find("div", attrs={"class":"b-story-body-x"})
+		self.pages.append({"page":fp.text})
+		
+		# multipaged?
+		while True:
+			next_page = page_soup.find("a", attrs={"class":"b-pager-next"})
+			if next_page:
+				page_url = next_page["href"]
+				new_page = requests.get(page_url).text
+				page_soup = bsoup(new_page, "html5lib")
+				page_content = page_soup.find("div", attrs={"class":"b-story-body-x"})
+				self.pages.append({"page": page_content})
+				continue
+			else:
+				break
 	
-	else:
-		# we assume no internet connection
-		return None
-
-def get_hits(query):
-	parsed_query = parse_query(query)
-	results_page = fetch_search(parsed_query)
-	hits = parse_for_urls(results_page.text, extra=True)
+	def transform(self):
+		# convert attributes to valid json (dict object)
+		return self.__dict__
 	
-	return hits
+	def make(self, m_story):
+		# convert transformed story (dict object) to Story object
+		p = m_story
+		
+		self.title = p.get("title")
+		self.author = p.get("author")
+		self.pages = p.get("pages")
+		
+		self.url = p.get("url")
+		self.uid = str(p.get("uid"))
+		
+		return self
 
-# to do:
-	# add rating retrieval
+class SearchHit:
+	# efficiently represent a search hit
+	# from local and internet searches
+	
+	# title
+	# url
+	# brief
+	# uid
+	
+	pass
+
+class Story:
+	# efficiently represent a story
+	# primary interface between database and app
+	pass
+
+
+def get_story_site():
+	# specified function to fetch and parse stories
+	# from supported sites
+	pass
