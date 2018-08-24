@@ -6,12 +6,12 @@ import os
 import secrets
 
 import service
+import search
 from handlers import *
 
 
 from tornado.options import define
 define("port", default=33041, type=int)
-
 
 
 handlers = [
@@ -41,7 +41,7 @@ def start():
 	server.listen(port)
 	
 	print("application server started")
-	print(f"server is listening port {port}")
+	print(f"server is listening on port {port}")
 	tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":

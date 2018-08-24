@@ -1,84 +1,149 @@
-# app dependent services
-import os
-import tinydb
+import re
+import hashlib
 
-import lois
-import search
+import requests
+import bs4
+bsoup = bs4.BeautifulSoup
 
-# database config: tinydb
-db_path = os.path.join(os.path.dirname(__file__), ".service")
-
-if not os.path.isdir(db_path):
-	os.mkdir(db_path)
-
-db_query = tinydb.Query()
-
-stories = tinydb.TinyDB(db_path + "/stories.db")
-trash = tinydb.TinyDB(db_path + "/trash.db")
-
-def get_story(story_id):
-	story = stories.get(db_query.story_id == story_id)
-	return story
-
-def save_story(web_page):
-	# pass web page on to lois.Story for parsing
-	# transform Story and write to database
-	# saving a story modifies the index too
+class HitDump:
+	# depreciated
+	# attempt to parse search results
+	title = ""
+	url = ""
+	brief = ""
+	valid = False
 	
-	story = lois.Story(web_page=web_page)
+	def __init__(self, story=None, raw_hit=None):
+		if not story:
+			# raw hit must be of type Tag element
+			if not isinstance(raw_hit, bs4.element.Tag):
+				return # or raise error
+			self.parse_hit(raw_hit)
+		
+		# or parse story object from internal search results
+		self.parse_story(story)
 	
-	# check for duplicates
-	if stories.search(db_query.story_id == story.story_id):
-		return {"error":"duplicate story", "msg":"duplicate story exists already"}
 	
-	stories.insert(story.transform())
-	index_story(story)
-
-def trash_story(story_id, permanent=False):
-	# move story across databases (to trash)
-	# modify index
-	
-	story = get_story(story_id)
-	stories.remove(query.story_id == story_id)
-	
-	if permanent:
-		writer = story_index.writer()
-		writer.delete_by_term("story_id", story_id)
-		writer.commit()
-		return {"error":None, "msg":"permanently trashed story"}
-	
-	trash_id = trash.insert(story)
-	return {"error":None, "msg":"moved story to trash"}
-
-def modify_story(story_id, mod={}):
-	# make modifications to a story
-	actions = ["fave", "read", "restore"]
-	
-	if not mod:
+	def parse_story(self, story):
+		self.title = story.title
+		self.url = "/stories/" + story.story_id
+		self.brief = story.pages[0]["page_content"][:150]
+		self.valid = True
 		return
 	
-	for action, value in mod.items():
-		pass
+	def parse_hit(self, raw_hit):
+		hit_rgx = r"(.*)(https://.*)(CachedSimilar|Cached)(.*)"
+		title_rgx = r"(.*) - (.*)*"
+		
+		raw_text = raw_hit.text.replace("\n", "")
+		match = re.search(hit_rgx, raw_text)
+		
+		if match:
+			raw_title = match.group(1)
+			match_title = re.search(title_rgx, raw_title)
+			
+			self.title = match_title.group(1)
+			self.url = match.group(2)
+			self.brief = match.group(4)
+			self.valid = True
+		else:
+			self.valid = False
+			return
 	
-	if action not in actions:
-		return # error
+	def transform(self):
+		hit = {"title": self.title, "url": self.url, "brief": self.brief}
+		return hit
+
+class StoryDump:
+	# depreciated
+	title = ""
+	author = ""
+	pages = []
 	
-	writer = story_index.writer()
+	url = "" # unique identifier
+	uid = "" # hash of story url
 	
-	if action == "fave":
-		stories.update({"fave": value}, db_query.story_id == story_id)
-		writer.update_document(story_id=story_id, fave=value)
-		return
-	elif action == "read":
-		stories.update({"read": value}, db_query.story_id == story_id)
-		writer.update_document(story_id=story_id, read=value)
-		return
+	def __init__(self, url=None, web_page=None):
+		if url:
+			web_page = requests.get(url)
+			self.parse_page(web_page.text)
+		else:
+			if web_page:
+				self.parse_page(web_page)
 	
-	if action == "restore":
-		if action == "true":
-			story = trash.get(query.story_id == story_id)
-			trash.remove(query.story_id == story_id)
-			stories.insert(story)
+	def parse_page(self, web_page):
+		page_soup = bsoup(web_page, "html5lib")
+		
+		# url in page is on the twitter button
+		twitter_btn = page_soup.find("a", attrs={"class":"twitter-share-button"})
+		self.title = twitter_btn["data-text"]
+		self.url = twitter_btn["data-url"]
+		self.uid = hashlib.md5(self.url.encode()).hexdigest()
+		
+		# author extract
+		author_soup = page_soup.find("span", attrs={"class":"b-story-user-y"})
+		self.author = author_soup.text
+		
+		# first page
+		fp = page_soup.find("div", attrs={"class":"b-story-body-x"})
+		self.pages.append({"page":fp.text})
+		
+		# multipaged?
+		while True:
+			next_page = page_soup.find("a", attrs={"class":"b-pager-next"})
+			if next_page:
+				page_url = next_page["href"]
+				new_page = requests.get(page_url).text
+				page_soup = bsoup(new_page, "html5lib")
+				page_content = page_soup.find("div", attrs={"class":"b-story-body-x"})
+				self.pages.append({"page": page_content})
+				continue
+			else:
+				break
 	
-	# more actions...
-	writer.commit()
+	def transform(self):
+		# convert attributes to valid json (dict object)
+		return self.__dict__
+	
+	def make(self, m_story):
+		# convert transformed story (dict object) to Story object
+		p = m_story
+		
+		self.title = p.get("title")
+		self.author = p.get("author")
+		self.pages = p.get("pages")
+		
+		self.url = p.get("url")
+		self.uid = str(p.get("uid"))
+		
+		return self
+
+class SearchHit:
+	"""SearchHit defines the attributes and methods
+	of a search result, whether local or over the internet."""
+	# title
+	# url
+	# brief
+	# uid
+	# scope
+	
+	pass
+
+class Story:
+	"""Story describes attributes and methods needed
+	to work with a story, acting as an API between the
+	database and app."""
+	
+	# title
+	# url
+	# uid
+	# author
+	# pages
+	
+	pass
+
+
+def get_story_from_site():
+	"""Contain code to parse web page from a given url.
+	Functions (parsers) are specific to each site."""
+	pass
