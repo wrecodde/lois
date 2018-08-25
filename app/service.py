@@ -47,3 +47,25 @@ def validate_user(asking_user):
 		return True
 	
 	return False
+
+def email_inuse(user_email):
+	exists = database.get_user(user_email)
+	if exists:
+		return True
+	return False
+
+def username_inuse(username):
+	all_users = database.users.all()
+	usernames = filter(lambda user: user.get("username"), all_users)
+	if username  in usernames:
+		return True
+	return False
+
+def validate_new_user(new_user):
+	used_email = email_inuse(new_user.get("email"))
+	used_username = username_inuse(new_user.get("username"))
+
+	if used_email == False and used_username == False:
+		return True
+	else:
+		return False

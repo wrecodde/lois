@@ -10,8 +10,8 @@ import service
 class BaseHandler(tornado.web.RequestHandler):
 	def get_current_user(self):
 		try:
-		    session_cookie = self.get_secure_cookie("user_session")
-		    if session_cookie:
+			session_cookie = self.get_secure_cookie("user_session")
+			if session_cookie:
 				user_info = json.loads(session_cookie)
 				return user_info.get("logged_in_user")
 			else:
@@ -52,30 +52,65 @@ class Auth_SignIn(BaseHandler):
 			}), expires_days=1)
 
 			self.write(json.dumps({
-				"err": None,
-				"err_msg": None
+				"status": "success",
+				"status_text": "user logged in successfully"
 			}))
 		else:
 			self.write(json.dumps({
-				"err": "incorrect creds",
-				"err_msg": "email or password is incorrect."
+				"status": "failed",
+				"status_text": "email or password is incorrect."
 			}))
 		
 
 class Auth_SignUp(BaseHandler):
 	def get(self):
 		redirect_to = self.get_query_argument("next")
-		user_session = self.get_current_user()
+		
+		self.render("auth/signup.html", next=redirect_to)
 	
 	def post(self):
-		pass
+		user = self.get_body_argument("user")
+
+		if service.email_inuse(user.get("email")):
+			self.write(json.dumps({
+				"status": "failed",
+				"status_text": "email address is already in use"
+			}))
+			return
+		
+		if service.username_inuse(user.get("username")):
+			self.write(json.dumps({
+				"status": "failed",
+				"status_text": "username is already in use"
+			}))
+			return
+		
+		service.create_user(user["email"], user["username"], user["password"])
+		self.write(json.dumps({
+			"status": "success",
+			"status_text": "user account created successfully"
+		}))
+		
+
 	
 class Auth_SignOut(BaseHandler):
 	def get(self):
 		user_logged_in = self.get_current_user()
 		if not user_logged_in:
 			return
-		self.clear_secure_cookie("user_session = self.get_current_user()")
+		try:
+			self.clear_secure_cookie("user_session")
+			self.write(json.dumps({
+				"status": "success",
+				"status_text": "user logged out successfully"
+			}))
+			return
+		except:
+			self.write(json.dumps({
+				"status": "failed",
+				"status_text": "server error. we're all over it already."
+			}))
+			raise
 
 class SearchHandler(BaseHandler):
 	def get(self):
