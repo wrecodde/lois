@@ -3,7 +3,7 @@
 import os
 import requests
 
-import lois
+import service
 
 import whoosh
 from whoosh.index import open_dir, create_in

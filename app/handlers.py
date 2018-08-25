@@ -3,62 +3,79 @@ import tornado.ioloop
 import tornado.options
 import tornado.gen
 
+import json
+
+import service
 
 class BaseHandler(tornado.web.RequestHandler):
 	def get_current_user(self):
 		try:
 		    session_cookie = self.get_secure_cookie("user_session")
-		    # decrypt and extract component user info
-		    # feed back to auth handler
+		    if session_cookie:
+				user_info = json.loads(session_cookie)
+				return user_info.get("logged_in_user")
+			else:
+				return None
 		except:
-			
 			# should an error occur
 			return None
 	
-	def password_hash(self, p):
-		try:
-			c, d = p[0], p[1:]
-			k = int(d) * ord(c)
-			return k
-		except:
-			return None
 
 class IndexHandler(BaseHandler):
 	@tornado.web.authenticated
 	def get(self):
 		self.render("index.html")
-	
-	@tornado.web.authenticated
-	def post(self):
-		self.write("data sent")
 
 
 # authentication
 class Auth_SignIn(BaseHandler):
 	def get(self):
-		next_page = self.get_argument("next", "/")
+		redirect_to = self.get_query_argument("next", "/")
 		user_session = self.get_current_user()
+		
 		if user_session is None:
 			# no user is logged in
-			self.render("auth/signin.html", next=next_page)
+			self.render("auth/signin.html", next=redirect_to)
 		else:
 			# re-authenticate user
 			self.clear_secure_cookie("user_session")
-			self.redirect("/auth/signin", next_page=next_page)
+			self.redirect("/auth/signin", next=redirect_to)
 	
 	def post(self):
 		# get and confirm user creds
-		user = self.get_query_argument("user")
-		next = self.get_argument("next_page")
+		user = json.loads(self.get_body_argument("user"))
+		grant_access = service.validate_user(user)
+
+		if grant_access is True:
+			self.set_secure_cookie("user_session", json.dumps({
+				"logged_in_user": user.get("email")
+			}), expires_days=1)
+
+			self.write(json.dumps({
+				"err": None,
+				"err_msg": None
+			}))
+		else:
+			self.write(json.dumps({
+				"err": "incorrect creds",
+				"err_msg": "email or password is incorrect."
+			}))
 		
-		print(user, next)
-		
-		self.set_secure_cookie("user_session", b"encryptediInfo")
-		# communication is via ajax
 
 class Auth_SignUp(BaseHandler):
-	pass
-
+	def get(self):
+		redirect_to = self.get_query_argument("next")
+		user_session = self.get_current_user()
+	
+	def post(self):
+		pass
+	
+class Auth_SignOut(BaseHandler):
+	def get(self):
+		user_logged_in = self.get_current_user()
+		if not user_logged_in:
+			return
+		self.clear_secure_cookie("user_session = self.get_current_user()")
 
 class SearchHandler(BaseHandler):
 	def get(self):

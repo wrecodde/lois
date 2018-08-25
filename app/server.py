@@ -18,6 +18,7 @@ handlers = [
 	(r"/", IndexHandler),
 	(r"/auth/signup", Auth_SignUp),
 	(r"/auth/signin", Auth_SignIn),
+	(r"/auth/signout", Auth_SignOut),
 	(r"/search", SearchHandler),
 	(r"/stories", Stories),
 	(r"/stories/([0-9]+)", StoryHandler),
