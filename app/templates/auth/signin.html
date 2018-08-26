@@ -1,0 +1,17 @@
+{% extends "../base.html" %}
+
+{% block page-content %}
+
+<a href="/auth/signup?next={{next}}">sign up instead</a>
+<div id="feedback">feedback box</div>
+
+<form>
+	<input id="user_email" type="email"/>
+	<input id="user_password" type="password"/>
+	<input type="hidden" id="next_pg_url" value="{{ next }}"/>
+	<button id="signin_btn">confirm creds</button>
+</form>
+
+<script src="{{ static_url('lois/js/user_auth.js') }}"></script>
+
+{% end block %}
