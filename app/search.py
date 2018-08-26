@@ -60,14 +60,9 @@ def local_search(query):
 	return hits
 	searcher.close()
 
-<<<<<<< HEAD:app/search.py
-def internet_lookup(query):
-	# make search queries to multiple sites
-=======
 def open_lookup(query):
 	# make an internet search of given queries
 	search_engine = "https://google.com/search?q="
->>>>>>> 556377430c879a67245a63e883c9147a97eef163:v2/search.py
 	
 	keywords = query.lower().split()
 	query_string = "+".join(keywords)
