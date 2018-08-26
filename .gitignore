@@ -12,3 +12,4 @@ assets/jquery/
 # porter db
 .porter/
 
+app/.database
