@@ -66,7 +66,6 @@ def internet_lookup(query):
 	query = "+".join(query.lower().split())
 	
 
-
 STORY_SCHEMA = Schema(
 	title = TEXT,
 	author = TEXT,
