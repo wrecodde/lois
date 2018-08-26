@@ -1,14 +1,11 @@
-# ignore notes dir
-notes/
 
 # ignore cache files
 *.pyc
 __pycache__/
 
 # ignore bootstrap and jquery
-assets/bootstrap/
-assets/jquery/
+app/static/bs
+app/static/jquery
 
-# porter db
-.porter/
-
+# database and storage
+app/.database
