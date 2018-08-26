@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Lois</title>
+		<meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no"/>
+		
+		<link rel="stylesheet" href="{{ static_url("bs/css/bootstrap.min.css") }}"/>
+		
+		<script src="{{ static_url("jquery/jquery-3.2.1.min.js") }} "></script>
+		<script src="{{ static_url("bs/js/bootstrap.min.js") }}"></script>
+		
+	</head>
+	
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-12">
+					{% block page-header %}
+					
+					{% end block %}
+				</div>
+				
+				<div class="col-xs-12">
+					{% block page-content %}
+					
+					{% end block %}
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+
