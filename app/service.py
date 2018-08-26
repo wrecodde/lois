@@ -56,7 +56,8 @@ def email_inuse(user_email):
 
 def username_inuse(username):
 	all_users = database.users.all()
-	usernames = filter(lambda user: user.get("username"), all_users)
+	usernames = [user.get("username") for user in all_users]
+	
 	if username  in usernames:
 		return True
 	return False

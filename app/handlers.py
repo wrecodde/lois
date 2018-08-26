@@ -38,7 +38,7 @@ class Auth_SignIn(BaseHandler):
 			self.render("auth/signin.html", next=redirect_to)
 		else:
 			# re-authenticate user
-			self.clear_secure_cookie("user_session")
+			self.clear_cookie("user_session")
 			self.redirect("/auth/signin", next=redirect_to)
 	
 	def post(self):
@@ -64,12 +64,12 @@ class Auth_SignIn(BaseHandler):
 
 class Auth_SignUp(BaseHandler):
 	def get(self):
-		redirect_to = self.get_query_argument("next")
+		redirect_to = self.get_query_argument("next", "/")
 		
 		self.render("auth/signup.html", next=redirect_to)
 	
 	def post(self):
-		user = self.get_body_argument("user")
+		user = json.loads(self.get_body_argument("user"))
 
 		if service.email_inuse(user.get("email")):
 			self.write(json.dumps({
@@ -85,7 +85,7 @@ class Auth_SignUp(BaseHandler):
 			}))
 			return
 		
-		service.create_user(user["email"], user["username"], user["password"])
+		service.database.create_user(user["email"], user["username"], user["password"])
 		self.write(json.dumps({
 			"status": "success",
 			"status_text": "user account created successfully"
@@ -99,7 +99,7 @@ class Auth_SignOut(BaseHandler):
 		if not user_logged_in:
 			return
 		try:
-			self.clear_secure_cookie("user_session")
+			self.clear_cookie("user_session")
 			self.write(json.dumps({
 				"status": "success",
 				"status_text": "user logged out successfully"
