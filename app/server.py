@@ -6,7 +6,6 @@ import os
 import secrets
 
 import service
-import search
 from handlers import *
 
 
