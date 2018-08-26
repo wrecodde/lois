@@ -9,3 +9,6 @@ app/static/jquery
 
 # database and storage
 app/.database
+
+# ignore .vscode
+.vscode/
