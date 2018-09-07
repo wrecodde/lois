@@ -36,24 +36,24 @@ class IndexHandler(BaseHandler):
 # authentication
 class Auth_SignIn(BaseHandler):
 	def get(self):
-		next_page = self.get_argument("next", "/")
+		next = self.get_query_argument("next", "/")
 		user_session = self.get_current_user()
+		
 		if user_session is None:
 			# no user is logged in
-			self.render("auth/signin.html", next=next_page)
+			self.render("auth/signin.html", next=next)
 		else:
 			# re-authenticate user
 			self.clear_secure_cookie("user_session")
-			self.redirect("/auth/signin", next_page=next_page)
+			self.redirect("/auth/signin", next=next)
 	
 	def post(self):
 		# get and confirm user creds
-		user = self.get_query_argument("user")
-		next = self.get_argument("next_page")
+		user = self.get_body_argument("data")
 		
-		print(user, next)
+		print(user)
 		
-		self.set_secure_cookie("user_session", b"encryptediInfo")
+		# self.set_secure_cookie("user_session", b"encryptediInfo")
 		# communication is via ajax
 
 class Auth_SignUp(BaseHandler):

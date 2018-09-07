@@ -9,6 +9,11 @@ let send_auth = function(auth_payload){
     })
 }
 
+function getCookie(name) {
+    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+    return r ? r[1] : undefined;
+}
+
 // evaluate auth message from server
 let eval_auth = function(response, status, object){
 	alert(JSON.stringify(response))
@@ -20,12 +25,11 @@ $("#auth_btn").on("click", function prep_auth(event){
     // collect data and send to server
     user_id = $("#user_id").val()
     user_key = $("#user_key").val()
-    next_page = $("#next_pg_url").val()
+    next = $("#next_pg_url").val()
     
     payload = {
-        "user": "burger",
-        "next_page": next_page,
+        "user": {"id": user_id, "key": user_key},
     }
     
-    send_auth(payload)
+    send_auth("bola meat")
 })
