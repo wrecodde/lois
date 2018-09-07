@@ -31,7 +31,6 @@ class IndexHandler(BaseHandler):
 class Auth_SignIn(BaseHandler):
 	def get(self):
 		redirect_to = self.get_query_argument("next", "/")
-		user_session = self.get_current_user()
 		
 		if user_session is None:
 			# no user is logged in
@@ -60,7 +59,6 @@ class Auth_SignIn(BaseHandler):
 				"status": "failed",
 				"status_text": "email or password is incorrect."
 			}))
-		
 
 class Auth_SignUp(BaseHandler):
 	def get(self):

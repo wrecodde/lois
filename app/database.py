@@ -15,6 +15,7 @@ users = tinydb.TinyDB(db_dir + "/users.db")
 stories = tinydb.TinyDB(db_dir + "/stories.db")
 trash = tinydb.TinyDB(db_dir + "/trash.db")
 
+
 def create_user(email, username, password):
 	users.insert({
 		"uid" : hash(email + username),
@@ -33,3 +34,4 @@ def get_user(email):
 		return user[0]
 	else:
 		return None
+

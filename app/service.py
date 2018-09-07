@@ -5,7 +5,9 @@ import requests
 import bs4
 bsoup = bs4.BeautifulSoup
 
+
 import database
+
 
 class SearchHit:
 	"""SearchHit defines the attributes and methods
